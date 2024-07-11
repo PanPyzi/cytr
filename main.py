@@ -29,13 +29,15 @@ def read_and_mark():
     while True:
         mark=input("Marking: ")
         if mark!="stop":
-            can_data_s[mark].=[]
+
 
             for v in range(0,20):
-                can_data_s[mark][v]=[]
+                can_data_tmp=[]
                 frame = socket.recv()
                 for i in range(0, len(frame.data.hex()))[::2]:
-                    can_data_s[mark][v].append(frame.data.hex()[i] + frame.data.hex()[i + 1])
+                    can_data_tmp.append(frame.data.hex()[i] + frame.data.hex()[i + 1])
+                can_data_s[mark].append(can_data_tmp)
+
         else:
             f = open("can_data_marked.txt", "w")
             f.write(json.dumps(can_data_s))
