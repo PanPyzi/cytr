@@ -40,7 +40,6 @@ def read_and_mark():
             return
 
 
-
 def keep_alive():
     can_id = 0x123
     data = bytes(range(0, 0x88, 0x11))
