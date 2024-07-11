@@ -10,19 +10,15 @@ socket = socketcan.CanRawSocket(interface=interface)
 
 
 def read_and_save():
-    can_data_s = {}
-    can_data = [[],[]]
-    a=0
     while True:
         frame = socket.recv()
         can_data_B = frame.data
-
-
-        can_id = str(hex(frame.can_id))
+        can_data = []
         for i in range(0, len(frame.data.hex()))[::2]:
-            can_data_s[can_id].append(frame.data.hex()[i] + frame.data.hex()[i + 1])
-            can_data[a].append(frame.data.hex()[i] + frame.data.hex()[i + 1])
-        a=a+1
+            can_data.append(frame.data.hex()[i] + frame.data.hex()[i + 1])
+        can_id = str(hex(frame.can_id))
+        RPM_D = int(str(can_data[2]), 16)
+        print(RPM_D)
 
 def read_and_mark():
     can_data_s = {}
