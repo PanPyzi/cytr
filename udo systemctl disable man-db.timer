@@ -1,0 +1,57 @@
+7.250s NetworkManager-wait-online.service
+2.415s dev-mmcblk0p2.device
+1.976s e2scrub_reap.service
+1.710s man-db.service
+1.161s ModemManager.service
+1.132s user@1000.service
+ 928ms keyboard-setup.service
+ 927ms NetworkManager.service
+ 715ms systemd-udev-trigger.service
+ 572ms systemd-fsck@dev-disk-by\x2dpartuuid-1a708eb7\x2d01.service
+ 496ms modprobe@fuse.service
+ 488ms sys-kernel-debug.mount
+ 487ms sys-kernel-tracing.mount
+ 486ms dev-mqueue.mount
+ 480ms ssh.service
+ 474ms avahi-daemon.service
+ 473ms modprobe@drm.service
+ 463ms fake-hwclock.service
+ 457ms polkit.service
+ 453ms modprobe@configfs.service
+ 438ms systemd-udevd.service
+ 435ms kmod-static-nodes.service
+ 433ms systemd-journald.service
+ 429ms systemd-timesyncd.service
+ 428ms systemd-modules-load.service
+ 414ms dbus.service
+ 413ms systemd-remount-fs.service
+ 405ms systemd-logind.service
+ 374ms wpa_supplicant.service
+ 367ms dphys-swapfile.service
+ 245ms sshswitch.service
+ 214ms systemd-tmpfiles-setup.service
+ 180ms rpi-eeprom-update.service
+ 143ms systemd-binfmt.service
+ 142ms triggerhappy.service
+ 141ms systemd-tmpfiles-clean.service
+ 136ms systemd-random-seed.service
+ 134ms systemd-sysusers.service
+ 131ms systemd-sysctl.service
+ 124ms systemd-journal-flush.service
+ 114ms systemd-rfkill.service
+ 111ms console-setup.service
+ 109ms sys-kernel-config.mount
+ 106ms sys-fs-fuse-connections.mount
+  94ms systemd-tmpfiles-setup-dev.service
+  84ms alsa-restore.service
+  71ms user-runtime-dir@1000.service
+  66ms boot-firmware.mount
+  56ms systemd-update-utmp.service
+  55ms systemd-user-sessions.service
+  39ms proc-sys-fs-binfmt_misc.mount
+  36ms systemd-update-utmp-runlevel.service
+  32ms run-rpc_pipefs.mount
+  18ms rpc-statd-notify.service
+  17ms modprobe@dm_mod.service
+  16ms modprobe@efi_pstore.service
+  14ms modprobe@loop.service
