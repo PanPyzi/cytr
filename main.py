@@ -14,7 +14,7 @@ import select
 import socket
 import asyncio
 from bless import BlessServer
-
+import obd  # biblioteka do obsługi ELM327
 
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtProperty, pyqtSlot
 from PyQt6.QtGui import QGuiApplication
@@ -77,6 +77,8 @@ class CarLogic(QObject):
         self._bt_device_name = ""
         self._bt_pairing_active = False
         self._bt_agent_proc = None
+        self._dtc_list = "Brak błędów"
+        self._obd_conn = None
 
 
 
@@ -310,6 +312,70 @@ class CarLogic(QObject):
         self._bt_device_name = ""
         self.dataChanged.emit()
         print("Stan parowania zresetowany na ekranie.")
+
+    @pyqtProperty(str, notify=dataChanged)
+    def dtcList(self):
+        return self._dtc_list
+
+    @pyqtSlot()
+    def readDtcCodes(self):
+        print("OBD: Odczyt błędów DTC...")
+        threading.Thread(target=self._async_read_dtc, daemon=True).start()
+
+    @pyqtSlot()
+    def clearDtcCodes(self):
+        print("OBD: Kasowanie błędów DTC (czyszczenie)...")
+        threading.Thread(target=self._async_clear_dtc, daemon=True).start()
+
+    def _get_obd_connection(self):
+        if self._obd_conn and self._obd_conn.is_connected():
+            return self._obd_conn
+        try:
+            # Próbujemy połączyć się przez wirtualny port Bluetooth RFCOMM
+            print("OBD: Łączenie z ELM327 na /dev/rfcomm0...")
+            connection = obd.OBD(port="/dev/rfcomm0", fast=False, timeout=3.0)
+            if connection.is_connected():
+                self._obd_conn = connection
+                return connection
+        except Exception as e:
+            print(f"OBD Błąd połączenia: {e}")
+        return None
+
+    def _async_read_dtc(self):
+        conn = self._get_obd_connection()
+        if not conn or not conn.is_connected():
+            self._dtc_list = "Brak połączenia z ELM!"
+            self.dataChanged.emit()
+            return
+
+        response = conn.query(obd.commands.GET_DTC)
+        if response.is_null() or not response.value:
+            self._dtc_list = "Brak zapisanych błędów (Baton OK)"
+        else:
+            # response.value zwraca listę krotek np. ('P0300', 'Wypadanie zapłonu')
+            dtcs = [f"{code}: {desc}" for code, desc in response.value]
+            self._dtc_list = "\n".join(dtcs)
+            print(f"OBD Odczytano błędy: {self._dtc_list}")
+
+        self.dataChanged.emit()
+
+    def _async_clear_dtc(self):
+        conn = self._get_obd_connection()
+        if not conn or not conn.is_connected():
+            self._dtc_list = "Brak połączenia z ELM!"
+            self.dataChanged.emit()
+            return
+
+        response = conn.query(obd.commands.CLEAR_DTC)
+        # CLEAR_DTC zwraca True/False w zależności od powodzenia
+        if response.value:
+            self._dtc_list = "Wyczyszczono kody DTC pomyślnie!"
+            print("OBD: Kody DTC zostały wyczyszczone.")
+        else:
+            self._dtc_list = "Nie udało się wyczyścić błędów."
+            print("OBD: Błąd podczas czyszczenia DTC.")
+
+        self.dataChanged.emit()
 
 
 
@@ -788,6 +854,19 @@ def ble_server_thread(logic):
 
         await server.stop()
         print("BLE: Serwer zatrzymany.")
+
+    def write_request(characteristic, value, expression):
+        try:
+            cmd = value.decode('utf-8').strip().lower()
+            print(f"BLE: Otrzymano komendę z telefonu: {cmd}")
+
+            if cmd == "readdtc":
+                logic.readDtcCodes()
+            elif cmd == "cleardtc":
+                logic.clearDtcCodes()
+
+        except Exception as e:
+            print(f"BLE błąd zapisu: {e}")
 
     try:
         loop.run_until_complete(run_server())
